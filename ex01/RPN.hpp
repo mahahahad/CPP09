@@ -5,6 +5,10 @@
 #include <queue>
 #include <sstream>
 
+#ifndef WHITESPACES
+#define WHITESPACES " \n\t\r\v\f"
+#endif
+
 class   RPN {
     public:
         RPN( void );
