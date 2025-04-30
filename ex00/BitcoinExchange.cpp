@@ -40,7 +40,7 @@ BitcoinExchange&  BitcoinExchange::operator=(const BitcoinExchange& copy) {
     return (*this);
 }
 
-BitcoinExchange::~BitcoinExchange() { }
+BitcoinExchange::~BitcoinExchange(void) { }
 
 void    BitcoinExchange::print(void) {
     for (
