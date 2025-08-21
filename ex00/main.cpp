@@ -45,20 +45,35 @@ int main(int argc, char *argv[]) {
             continue ;
         }
         std::string date = line.substr(0, pipePos);
-        std::string valueString = line.substr(
-            pipePos + 1, line.size() - pipePos
-        );
+        std::string valueString = line.substr(pipePos + 1);
         trim(date);
         trim(valueString);
 
+        // Ignore the header
         if (date == "date")
             continue ;
+        
+        if (isValidDate(date) == false) {
+            std::cerr << "Error: invalid date (must be YYYY-MM-DD) => " << line << std::endl;
+            continue ;
+        }
+        
+        if (valueString.empty()) {
+            std::cerr << "Error: bad input (value not provided) => " << line << std::endl;
+            continue ;
+        }
 
         std::stringstream valueStream;
         float   valueFloat;
+        char    c;
         valueStream << valueString;
         valueStream >> valueFloat;
 
+        if (valueStream.get(c) || valueStream.bad()) {
+            std::cerr << "Error: bad input => " << line << std::endl;
+            continue ;
+        }
+        
         if (valueFloat <= 0) {
             std::cerr << "Error: not a positive number." << std::endl;
             continue ;

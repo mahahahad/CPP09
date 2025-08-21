@@ -8,14 +8,25 @@
 #include <map>
 #include <sstream>
 
+struct  Date {
+    short int   year;
+    short int   month;
+    short int   day;
+
+    bool        operator==( const Date& date ) const;
+    bool        operator!=( const Date& date ) const;
+    bool        operator>( const Date& date ) const;
+    bool        operator<( const Date& date ) const;
+};
+
 class   BitcoinExchange {
     public:
-        BitcoinExchange( void );
+        BitcoinExchange();
         BitcoinExchange( const std::string& databasePath );
         BitcoinExchange( const BitcoinExchange& copy );
         BitcoinExchange&  operator=( const BitcoinExchange& copy );
-        ~BitcoinExchange( void );
-        void    print( void );
+        ~BitcoinExchange();
+        void    print();
         float   get( const std::string& key ) ;
     
     // Member functions
@@ -24,8 +35,10 @@ class   BitcoinExchange {
 
     // Attributes
     private:
-        std::map<std::string, float>    _data;
-
+        std::map<Date, float>    _data;
 };
+
+bool    isValidDate( const std::string& date );
+std::ostream&   operator<<( std::ostream& output, const Date& date);
 
 #endif

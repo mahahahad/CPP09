@@ -1,5 +1,79 @@
 #include "BitcoinExchange.hpp"
 
+bool    isValidDate(const std::string& date) {
+    std::size_t dashIndex[2] = { date.find('-'), date.find('-', dashIndex[0] + 1) };
+    std::string year;
+    std::string month;
+    std::string day;
+
+    // No dashes found, return false immediately
+    if (dashIndex[0] == std::string::npos || dashIndex[1] == std::string::npos)
+        return (false);
+    
+    year = date.substr(0, dashIndex[0]);
+    month = date.substr(dashIndex[0] + 1, dashIndex[1] - dashIndex[0] - 1);
+    day = date.substr(dashIndex[1] + 1);
+
+    // Enforce YYYY-MM-DD
+    if (year.length() != 4 || month.length() != 2 || day.length() != 2)
+        return (false);
+    
+    // Check valid dates
+    if (month > "12" || day > "31")
+        return (false);
+    return (true);
+}
+
+/**
+ * @brief Create a Date object from the provided date string
+ * 
+ * @param date The string to create the date object from
+ * @return Date The created date object
+ */
+Date    createDate(const std::string& date) {
+    Date    createdDate;
+    std::stringstream   year;
+    std::stringstream   month;
+    std::stringstream   day;
+
+    year << date.substr(0, 4);
+    year >> createdDate.year;
+    month << date.substr(5, 2);
+    month >> createdDate.month;
+    day << date.substr(8, 2);
+    day >> createdDate.day;
+    return (createdDate);
+}
+
+bool    Date::operator<(const Date& date) const {
+    if (this->year != date.year)
+        return (this->year < date.year);
+    if (this->month != date.month)
+        return (this->month < date.month);
+    return (this->day < date.day);
+}
+
+bool    Date::operator>(const Date& date) const {
+    if (this->year != date.year)
+        return (this->year > date.year);
+    if (this->month != date.month)
+        return (this->month > date.month);
+    return (this->day > date.day);
+}
+
+bool    Date::operator!=(const Date& date) const {
+    return (this->year != date.year || this->month != date.month || this->day != date.day);
+}
+
+bool    Date::operator==(const Date& date) const {
+    return (this->year == date.year && this->month == date.month && this->day == date.day);
+}
+
+std::ostream&   operator<<(std::ostream& output, const Date& date) {
+    output << date.year << "-" << date.month << "-" << date.day;
+    return (output);
+}
+
 /**
  * @brief Read everything from the database and update the map container
  * using these key-value pairs.
@@ -15,16 +89,22 @@ int BitcoinExchange::_populateMap(
 
     while (getline(db, line).good()) {
         std::stringstream   valueStr;
-        valueStr << line.substr(
-            line.find(',') + 1, line.size() - line.find(',') + 1
-        );
+        std::size_t         commaIndex = line.find(',');
+        
+        if (commaIndex == std::string::npos)
+            continue ;
+        if (isValidDate(line.substr(0, commaIndex)) == false)
+            continue ;
+        valueStr << line.substr(commaIndex + 1);
+        if (valueStr.str().empty())
+            continue ;
         valueStr >> value;
-        _data[line.substr(0, line.find(','))] = value;
+        _data[createDate(line.substr(0, commaIndex))] = value;
     }
     return (0);
 }
 
-BitcoinExchange::BitcoinExchange(void) {
+BitcoinExchange::BitcoinExchange() {
     _populateMap();
 }
 
@@ -40,11 +120,11 @@ BitcoinExchange&  BitcoinExchange::operator=(const BitcoinExchange& copy) {
     return (*this);
 }
 
-BitcoinExchange::~BitcoinExchange(void) { }
+BitcoinExchange::~BitcoinExchange() { }
 
-void    BitcoinExchange::print(void) {
+void    BitcoinExchange::print() {
     for (
-        std::map<std::string, float>::const_iterator it = _data.begin();
+        std::map<Date, float>::const_iterator it = _data.begin();
         it != _data.end();
         ++it
     ) {
@@ -54,13 +134,14 @@ void    BitcoinExchange::print(void) {
 }
 
 float   BitcoinExchange::get(const std::string& key) {
-    std::map<std::string, float>::iterator it = _data.lower_bound(key);
+    Date    date = createDate(key);
+    std::map<Date, float>::iterator it = _data.lower_bound(date);
 
-    if (it->first != key) {
+    if (it->first != date && it != _data.begin()) {
         --it;
-        // std::cout << key << " matched with " << it->first << std::endl;
+        // std::cout << date << " matched with " << it->first << std::endl;
         return (it->second);
     }
-    // std::cout << key << " matched with " << it->first << std::endl;
+    // std::cout << date << " matched with " << it->first << std::endl;
     return (it->second);
 }
