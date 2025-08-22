@@ -2,8 +2,9 @@
 #define RPN_HPP
 
 #include <iostream>
-#include <queue>
+#include <stack>
 #include <sstream>
+#include <limits>
 
 #ifndef WHITESPACES
 #define WHITESPACES " \n\t\r\v\f"
@@ -15,11 +16,18 @@ class   RPN {
         RPN( const RPN& copy );
         RPN&  operator=( const RPN& copy );
         ~RPN( void );
-        void    parseAndAdd( char *line );
-        int     evaluate( void ) ;
 
+        std::stack<long> getStack() const;
+        bool    getHasError() const;
+
+        int     handleAdd( char *line );
+        int     evaluate( const std::string& op ) ;
+        int     printResult() const;
+        
     private:
-        std::queue<std::string> _queue;
+        std::stack<long>    _stack;
+        bool                _hasError;
+        int                 _parse( const std::string& charToAdd );
 };
 
 #endif

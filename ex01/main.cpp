@@ -8,8 +8,8 @@ int main(int argc, char *argv[]) {
     RPN rpn;
 
     for (int i = 1; i < argc; i++) {
-        rpn.parseAndAdd(argv[i]);
+        if (rpn.handleAdd(argv[i]))
+            break ;
     }
-    std::cout << rpn.evaluate() << std::endl;
-    return (0);
+    return (rpn.printResult());
 }
