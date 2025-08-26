@@ -91,7 +91,6 @@ int BitcoinExchange::_populateMap(
     std::string         line;
     float               value;
 
-    // TODO: Add a check for invalid database
     if (!db.good()) {
         return (1);
     }
