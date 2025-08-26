@@ -26,67 +26,72 @@ int main(int argc, char *argv[]) {
         std::cerr << "Error: could not open file." << std::endl;
         return (1);
     }
-    BitcoinExchange btcExchange;
-    std::ifstream   inputFile(argv[1]);
+    try {
+        BitcoinExchange btcExchange;
+        std::ifstream   inputFile(argv[1]);
 
-    if (!inputFile.good()) {
-        std::cerr << "Error: could not open file." << std::endl;
+        if (!inputFile.good()) {
+            std::cerr << "Error: could not open file." << std::endl;
+            return (1);
+        }
+
+        std::string line;
+        while (inputFile.good()) {
+            getline(inputFile, line);
+            if (line == "")
+                continue ;
+            size_t  pipePos = line.find("|");
+            if (pipePos == line.npos) {
+                std::cerr << "Error: bad input => " << line << std::endl;
+                continue ;
+            }
+            std::string date = line.substr(0, pipePos);
+            std::string valueString = line.substr(pipePos + 1);
+            trim(date);
+            trim(valueString);
+
+            // Ignore the header
+            if (date == "date")
+                continue ;
+            
+            if (isValidDate(date) == false) {
+                std::cerr << "Error: invalid date (must be YYYY-MM-DD) => " << line << std::endl;
+                continue ;
+            }
+            
+            if (valueString.empty()) {
+                std::cerr << "Error: bad input (value not provided) => " << line << std::endl;
+                continue ;
+            }
+
+            std::stringstream valueStream;
+            float   valueFloat;
+            char    c;
+            valueStream << valueString;
+            valueStream >> valueFloat;
+
+            if (valueStream.get(c) || valueStream.bad()) {
+                std::cerr << "Error: bad input => " << line << std::endl;
+                continue ;
+            }
+            
+            if (valueFloat <= 0) {
+                std::cerr << "Error: not a positive number." << std::endl;
+                continue ;
+            }
+            if (valueFloat > 1000) {
+                std::cerr << "Error: too large a number." << std::endl;
+                continue ;
+            }
+
+            std::cout
+                << date << " => " << valueString << " = "
+                << valueFloat * btcExchange.get(date)
+                << std::endl;
+        }
+    } catch (std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
         return (1);
-    }
-
-    std::string line;
-    while (inputFile.good()) {
-        getline(inputFile, line);
-        if (line == "")
-            continue ;
-        size_t  pipePos = line.find("|");
-        if (pipePos == line.npos) {
-            std::cerr << "Error: bad input => " << line << std::endl;
-            continue ;
-        }
-        std::string date = line.substr(0, pipePos);
-        std::string valueString = line.substr(pipePos + 1);
-        trim(date);
-        trim(valueString);
-
-        // Ignore the header
-        if (date == "date")
-            continue ;
-        
-        if (isValidDate(date) == false) {
-            std::cerr << "Error: invalid date (must be YYYY-MM-DD) => " << line << std::endl;
-            continue ;
-        }
-        
-        if (valueString.empty()) {
-            std::cerr << "Error: bad input (value not provided) => " << line << std::endl;
-            continue ;
-        }
-
-        std::stringstream valueStream;
-        float   valueFloat;
-        char    c;
-        valueStream << valueString;
-        valueStream >> valueFloat;
-
-        if (valueStream.get(c) || valueStream.bad()) {
-            std::cerr << "Error: bad input => " << line << std::endl;
-            continue ;
-        }
-        
-        if (valueFloat <= 0) {
-            std::cerr << "Error: not a positive number." << std::endl;
-            continue ;
-        }
-        if (valueFloat > 1000) {
-            std::cerr << "Error: too large a number." << std::endl;
-            continue ;
-        }
-
-        std::cout
-            << date << " => " << valueString << " = "
-            << valueFloat * btcExchange.get(date)
-            << std::endl;
     }
     return (0);
 }

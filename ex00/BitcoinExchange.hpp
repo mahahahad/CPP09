@@ -29,6 +29,12 @@ class   BitcoinExchange {
         void    print();
         float   get( const std::string& key ) ;
     
+    public:
+        class   InvalidDatabaseException: public std::exception {
+            public:
+                virtual const char*   what() const throw();
+        };
+    
     // Member functions
     private:
         int _populateMap( const std::string& databasePath );

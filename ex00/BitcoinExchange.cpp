@@ -74,6 +74,10 @@ std::ostream&   operator<<(std::ostream& output, const Date& date) {
     return (output);
 }
 
+const char* BitcoinExchange::InvalidDatabaseException::what() const throw() {
+    return ("invalid database.");
+}
+
 /**
  * @brief Read everything from the database and update the map container
  * using these key-value pairs.
@@ -87,6 +91,10 @@ int BitcoinExchange::_populateMap(
     std::string         line;
     float               value;
 
+    // TODO: Add a check for invalid database
+    if (!db.good()) {
+        return (1);
+    }
     while (getline(db, line).good()) {
         std::stringstream   valueStr;
         std::size_t         commaIndex = line.find(',');
@@ -105,7 +113,8 @@ int BitcoinExchange::_populateMap(
 }
 
 BitcoinExchange::BitcoinExchange() {
-    _populateMap();
+    if (_populateMap())
+        throw(InvalidDatabaseException());
 }
 
 BitcoinExchange::BitcoinExchange(const std::string& databasePath) {
