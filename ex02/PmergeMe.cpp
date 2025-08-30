@@ -9,6 +9,10 @@ std::vector<int> PmergeMe::getArr() const {
     return (_arr);
 }
 
+std::vector<int> PmergeMe::getMain() const {
+    return (_main);
+}
+
 // trim from end of string (right)
 inline std::string& rtrim(std::string& s, const char* t)
 {
@@ -74,44 +78,90 @@ int    PmergeMe::handleAdd(char *line) {
     return (0);
 }
 
+std::vector<int>    getWinners(const std::vector<Pair>& pairs) {
+    std::vector<int>    winners;
+
+    for (unsigned int i = 0; i < pairs.size(); i++) {
+        winners.push_back(pairs[i].winner);
+    }
+    return (winners);
+}
+
+std::vector<int>    getLosers(const std::vector<Pair>& pairs) {
+    std::vector<int>    losers;
+
+    for (unsigned int i = 0; i < pairs.size(); i++) {
+        if (pairs[i].loser != -1)
+            losers.push_back(pairs[i].loser);
+    }
+    return (losers);
+}
+
+std::vector<Pair>   makePairs(std::vector<int> arr) {
+    std::vector<Pair>   pairs;
+
+    for (unsigned int i = 0; i < arr.size(); i++) {
+        Pair    pair;
+        if (i + 1 < arr.size()) {
+            if (arr[i] < arr[i + 1]) {
+                pair.winner = arr[i + 1];
+                pair.loser = arr[i];
+            } else {
+                pair.winner = arr[i];
+                pair.loser = arr[i + 1];
+            }
+            i++;
+        } else {
+            pair.winner = arr[i];
+            pair.loser = -1;
+        }
+        pairs.push_back(pair);
+    }
+    return (pairs);
+}
+
+int getPairedWinner(std::vector<Pair> pairs, int loser) {
+    for (unsigned int i = 0; i < pairs.size(); i++) {
+        if (pairs[i].loser == loser)
+            return (pairs[i].winner);
+    }
+    return (-1);
+}
+
 int    PmergeMe::sort(std::vector<int> winners) {
     // Create a list of losers and winners
-    std::vector<int> losers;
-    std::vector<int>::iterator it = winners.begin();
+    std::vector<int>::iterator itLoser;
+    std::vector<Pair>   pairs;
+    std::vector<int>    roundWinners;
+    std::vector<int>    roundLosers;
 
-    // Make pairs and compare between each
-    while (it != winners.end()) {
-        // Check if next is present
-        if (it + 1 != winners.end()) {
-            // std::cout << "Current: " << *it << std::endl;
-            // std::cout << "Next: " << *(it + 1) << std::endl;
-            if (*it < *(it + 1)) {
-                // std::cout << *(it + 1) << " is greater than " << *it << std::endl;
-                losers.push_back(*it);
-                winners.erase(it);
-            } else {
-                // std::cout << *(it + 1) << " is lesser than " << *it << std::endl;
-                losers.push_back(*(it + 1));
-                winners.erase(it + 1);
+    // Group each number in the provided array into pairs
+    pairs = makePairs(winners);
+    roundWinners = getWinners(pairs);
+    roundLosers = getLosers(pairs);
+
+    if (roundWinners.size() > 1) {
+        sort(roundWinners);
+    } else {
+        // Final form reached
+        _main.insert(_main.begin(), roundWinners.begin(), roundWinners.end());
+    }
+
+    itLoser = roundLosers.begin();
+    while (itLoser != roundLosers.end()) {
+        // Find the position to insert this loser in based on their paired winner
+        int pairedWinner = getPairedWinner(pairs, *itLoser);
+        if (pairedWinner != -1) {
+            for (std::vector<int>::iterator it = _main.begin(); *it <= pairedWinner; it++) {
+                if (*itLoser < *it) {
+                    _main.insert(it, *itLoser);
+                    break ;
+                }
             }
-            it++;
-        } else
-            break ;
+        }
+        itLoser++;
     }
 
-    // printArr(winners);
-
-    // Check if the list of winners contains more than 1 element
-    // Call itself if it does until it doesn't
-    if (winners.size() != 1)
-        sort(winners);
-    else {
-        _arr.clear();
-        _arr.insert(_arr.begin(), winners.begin(), winners.end());
-    }
-    
-    // Insert losers into the main _arr vector
-    _arr.insert(_arr.begin(), losers.begin(), losers.end());
     return (0);
 }
 

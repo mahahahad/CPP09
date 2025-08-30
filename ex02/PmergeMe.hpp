@@ -5,10 +5,18 @@
 #include <vector>
 #include <sstream>
 #include <limits>
+#include <algorithm>
 
 #ifndef WHITESPACES
 #define WHITESPACES " \n\t\r\v\f"
 #endif
+
+struct  Pair {
+    unsigned int    winner;
+    int             loser;
+};
+
+std::vector<int>    getWinners( const std::vector<Pair>& pairs );
 
 class   PmergeMe {
     public:
@@ -18,6 +26,7 @@ class   PmergeMe {
         ~PmergeMe( void );
 
         std::vector<int> getArr() const;
+        std::vector<int> getMain() const;
 
         int     handleAdd( char *line );
         int     sort( std::vector<int> winners ) ;
@@ -25,6 +34,8 @@ class   PmergeMe {
         
     private:
         std::vector<int>    _arr;
+        std::vector<int>    _main;
+        std::vector<int>    _pend;
         int                 _parse( const std::string& charToAdd );
 };
 

@@ -12,6 +12,6 @@ int main(int argc, char *argv[]) {
             break ;
     }
     pmg.sort(pmg.getArr());
-    pmg.printArr(pmg.getArr());
+    pmg.printArr(pmg.getMain());
     return (0);
 }
