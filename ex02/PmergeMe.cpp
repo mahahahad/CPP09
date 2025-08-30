@@ -128,6 +128,56 @@ int getPairedWinner(std::vector<Pair> pairs, int loser) {
     return (-1);
 }
 
+unsigned int jacobNum(int i) {
+    if (i <= 0)
+        return (0);
+    if (i == 1)
+        return (1);
+    return (jacobNum(i - 1) + 2 * jacobNum(i - 2));
+}
+
+/*
+Jacobsthal Numbers:
+0, 1, 1, 3, 5, 11, 21, ...
+Used for insertion of the pend elements into the main chain at every recursion level
+3, 2, 5, 4, 11, 10, 9, 8, 7, 6, ...
+Calculated using the length of the pend chain
+- Take a number from the jacobsthal series
+- Subtract 1 from it and keep going until you hit a number already in the series
+- Check if there are these many numbers even present in the pend chain.
+- If not, insert the number of elements which is present
+
+If there are 3 elements in the pend:
+1, 3, 2
+
+If there are 10 elements in the pend:
+1, 3, 2, 5, 4, (11 but doesn't exist), 10, 9, 8, 7, 6
+
+The highest index value you can achieve must be the length of the pend chain
+*/
+std::vector<int>    generateJacobsthalSequence(unsigned int len) {
+    std::vector<int>    seq;
+
+    if (len == 0)
+        return (seq);
+
+    for (int i = 2; jacobNum(i) <= len; i++) {
+        for (int j = jacobNum(i); j >= 1; j--) {
+            if (std::find(seq.begin(), seq.end(), j) != seq.end())
+                break ;
+            seq.push_back(j);
+        }
+    }
+    if (seq.size() != len) {
+        for (int i = len; i >= 1; i--) {
+            if (std::find(seq.begin(), seq.end(), i) != seq.end())
+                break ;
+            seq.push_back(i);
+        }
+    }
+    return (seq);
+}
+
 int    PmergeMe::sort(std::vector<int> winners) {
     // Create a list of losers and winners
     std::vector<int>::iterator itLoser;
@@ -147,14 +197,22 @@ int    PmergeMe::sort(std::vector<int> winners) {
         _main.insert(_main.begin(), roundWinners.begin(), roundWinners.end());
     }
 
-    itLoser = roundLosers.begin();
-    while (itLoser != roundLosers.end()) {
+    // Generate jacobsthal sequence of indices based on losers length
+    std::vector<int> jacobInsertionSeq = generateJacobsthalSequence(roundLosers.size());
+
+    itLoser = jacobInsertionSeq.begin();
+    while (itLoser != jacobInsertionSeq.end()) {
+        if (*itLoser == 1) {
+            _main.insert(_main.begin(), roundLosers[(*itLoser) - 1]);
+            itLoser++;
+            continue ;
+        }
         // Find the position to insert this loser in based on their paired winner
-        int pairedWinner = getPairedWinner(pairs, *itLoser);
+        int pairedWinner = getPairedWinner(pairs, roundLosers[(*itLoser) - 1]);
         if (pairedWinner != -1) {
             for (std::vector<int>::iterator it = _main.begin(); *it <= pairedWinner; it++) {
-                if (*itLoser < *it) {
-                    _main.insert(it, *itLoser);
+                if (roundLosers[(*itLoser) - 1] < *it) {
+                    _main.insert(it, roundLosers[(*itLoser) - 1]);
                     break ;
                 }
             }

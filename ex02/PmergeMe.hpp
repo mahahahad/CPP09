@@ -35,7 +35,6 @@ class   PmergeMe {
     private:
         std::vector<int>    _arr;
         std::vector<int>    _main;
-        std::vector<int>    _pend;
         int                 _parse( const std::string& charToAdd );
 };
 
