@@ -59,6 +59,15 @@ void    printArr(const std::deque<int>& arr) {
     std::cout << std::endl;
 }
 
+std::ostream&   operator<<(std::ostream& output, std::deque<int> arr) {
+    for (unsigned int i = 0; i < arr.size(); i++) {
+        output << arr[i];
+        if (i + 1 != arr.size())
+            output << ", ";
+    }
+    return (output);
+}
+
 std::ostream&   operator<<(std::ostream& output, std::vector<int> arr) {
     for (unsigned int i = 0; i < arr.size(); i++) {
         output << arr[i];
