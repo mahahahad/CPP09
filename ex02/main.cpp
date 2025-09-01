@@ -11,9 +11,11 @@ int main(int argc, char *argv[]) {
         if (pmg.handleAdd(argv[i]))
             break ;
     }
-    std::cout << "Before: " << pmg.getArr() << std::endl;
+    std::cout << "Before: " << pmg.getVector() << std::endl;
     std::cout << "After:  ";
-    printArr(pmg.sort(pmg.getArr()));
-    std::cout << "Time to process a range of " << pmg.getArr().size() << " elements with std::vector : " << (double)(pmg.endTime - pmg.startTime) * 1000.0 / CLOCKS_PER_SEC << " ms" << std::endl;
+    printArr(pmg.sort(pmg.getVector()));
+    std::cout << "Time to process a range of " << pmg.getVector().size() << " elements with std::vector : " << (double)(pmg.endTime - pmg.startTime) * 1000.0 / CLOCKS_PER_SEC << " ms" << std::endl;
+    pmg.sort(pmg.getDeque());
+    std::cout << "Time to process a range of " << pmg.getDeque().size() << " elements with std::deque : " << (double)(pmg.endTime - pmg.startTime) * 1000.0 / CLOCKS_PER_SEC << " ms" << std::endl;
     return (0);
 }

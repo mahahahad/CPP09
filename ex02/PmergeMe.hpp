@@ -3,6 +3,7 @@
 
 # include <iostream>
 # include <vector>
+# include <deque>
 # include <sstream>
 # include <limits>
 # include <algorithm>
@@ -29,9 +30,12 @@ class   PmergeMe {
         PmergeMe&  operator=( const PmergeMe& copy );
         ~PmergeMe( void );
 
-        std::vector<int>    getArr() const;
+        std::vector<int>    getVector() const;
+        std::deque<int>     getDeque() const;
+
         int                 handleAdd( char *line );
         std::vector<int>    sort( const std::vector<int>& initialMain );
+        std::deque<int>     sort( const std::deque<int>& initialMain );
 
         clock_t             startTime;
         clock_t             endTime;
@@ -42,6 +46,8 @@ class   PmergeMe {
 };
 
 void            printArr( const std::vector<int>& arr );
+void            printArr( const std::deque<int>& arr );
 std::ostream&   operator<<( std::ostream& output, std::vector<int> arr );
+std::ostream&   operator<<( std::ostream& output, std::deque<int> arr );
 
 #endif

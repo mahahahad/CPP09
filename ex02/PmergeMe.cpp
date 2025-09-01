@@ -5,12 +5,20 @@
 #endif 
 
 PmergeMe::PmergeMe(void) { }
-PmergeMe::PmergeMe(const PmergeMe& copy): _arr(copy.getArr()) { }
-PmergeMe&  PmergeMe::operator=(const PmergeMe& copy) { _arr = copy.getArr(); return (*this); }
+PmergeMe::PmergeMe(const PmergeMe& copy): _arr(copy.getVector()) { }
+PmergeMe&  PmergeMe::operator=(const PmergeMe& copy) { _arr = copy.getVector(); return (*this); }
 PmergeMe::~PmergeMe(void) { }
 
-std::vector<int> PmergeMe::getArr() const {
+std::vector<int> PmergeMe::getVector() const {
     return (_arr);
+}
+
+std::deque<int> PmergeMe::getDeque() const {
+    std::deque<int> deque;
+
+    for (unsigned int i = 0; i < _arr.size(); i++) 
+        deque.push_back(_arr[i]);
+    return (deque);
 }
 
 // trim from end of string (right)
@@ -34,6 +42,15 @@ inline std::string& trim(std::string& s)
 }
 
 void    printArr(const std::vector<int>& arr) {
+    for (unsigned int i = 0; i < arr.size(); i++) {
+        std::cout << arr[i];
+        if (i + 1 != arr.size())
+            std::cout << ", ";
+    }
+    std::cout << std::endl;
+}
+
+void    printArr(const std::deque<int>& arr) {
     for (unsigned int i = 0; i < arr.size(); i++) {
         std::cout << arr[i];
         if (i + 1 != arr.size())
@@ -110,6 +127,14 @@ std::vector<int>    getWinners(const std::vector<Pair>& pairs) {
     return (winners);
 }
 
+std::deque<int>    getWinners(const std::deque<Pair>& pairs) {
+    std::deque<int>    winners;
+
+    for (unsigned int i = 0; i < pairs.size(); i++)
+        winners.push_back(pairs[i].winner);
+    return (winners);
+}
+
 /**
  * @brief Get the losers from the pairs in the provided pairs vector
  * 
@@ -118,6 +143,14 @@ std::vector<int>    getWinners(const std::vector<Pair>& pairs) {
  */
 std::vector<int>    getLosers(const std::vector<Pair>& pairs) {
     std::vector<int>    losers;
+
+    for (unsigned int i = 0; i < pairs.size(); i++)
+        losers.push_back(pairs[i].loser);
+    return (losers);
+}
+
+std::deque<int>    getLosers(const std::deque<Pair>& pairs) {
+    std::deque<int>    losers;
 
     for (unsigned int i = 0; i < pairs.size(); i++)
         losers.push_back(pairs[i].loser);
@@ -153,6 +186,27 @@ std::vector<Pair>   makePairs(const std::vector<int>& arr) {
     return (pairs);
 }
 
+std::deque<Pair>   makePairs(const std::deque<int>& arr) {
+    std::deque<Pair>   pairs;
+
+    for (unsigned int i = 0; i < arr.size(); i++) {
+        Pair    pair;
+        if (i + 1 < arr.size()) {
+            if (arr[i] < arr[i + 1]) {
+                pair.winner = arr[i + 1];
+                pair.loser = arr[i];
+            } else {
+                pair.winner = arr[i];
+                pair.loser = arr[i + 1];
+            }
+            i++;
+        } else
+            return (pairs);
+        pairs.push_back(pair);
+    }
+    return (pairs);
+}
+
 /**
  * @brief Get the winner paired with the provided loser.
  * 
@@ -161,6 +215,14 @@ std::vector<Pair>   makePairs(const std::vector<int>& arr) {
  * @return `int` - The winner if found, or -1 if not found
  */
 int getPairedWinner(const std::vector<Pair>& pairs, unsigned int loser) {
+    for (unsigned int i = 0; i < pairs.size(); i++) {
+        if (pairs[i].loser == loser)
+            return (pairs[i].winner);
+    }
+    return (-1);
+}
+
+int getPairedWinner(const std::deque<Pair>& pairs, unsigned int loser) {
     for (unsigned int i = 0; i < pairs.size(); i++) {
         if (pairs[i].loser == loser)
             return (pairs[i].winner);
@@ -252,6 +314,23 @@ void    updatePend(std::vector<Pair>& pairs, std::vector<int>& main, std::vector
     }
 }
 
+void    updatePend(std::deque<Pair>& pairs, std::deque<int>& main, std::deque<int>& losers) {
+    int temp;
+
+    for (unsigned int i = 0; i < losers.size(); i++) {
+        int pairedWinner = getPairedWinner(pairs, losers[i]);
+        if (pairedWinner != -1) {
+            unsigned int winnerIndex = std::find(main.begin(), main.end(), pairedWinner) - main.begin();
+            if (winnerIndex != i) {
+                // Since there is a mismatch of winners and their paired losers in the loser chain, update the order
+                temp = losers[winnerIndex];
+                losers[winnerIndex] = losers[i];
+                losers[i] = temp;
+            }
+        }
+    }
+}
+
 /**
  * @brief Search the provided array for the index to insert the given element and return it
  * 
@@ -277,6 +356,21 @@ unsigned int    binarySearch(int element, const std::vector<int>& arr) {
     return lowerBound;
 }
 
+unsigned int    binarySearch(int element, const std::deque<int>& arr) {
+    unsigned int lowerBound = 0;
+    unsigned int upperBound = arr.size();
+    
+    while (lowerBound < upperBound) {
+        unsigned int midPoint = lowerBound + (upperBound - lowerBound) / 2;
+        
+        if (element < arr[midPoint]) {
+            upperBound = midPoint;
+        } else {
+            lowerBound = midPoint + 1;
+        }
+    }
+    return lowerBound;
+}
 /**
  * @brief 
  * # Merge-Insertion Sort
@@ -353,6 +447,90 @@ std::vector<int>    PmergeMe::sort(const std::vector<int>& initialMain) {
         if (pairedWinner != -1) {
             std::vector<int>    subvector;
             for (std::vector<int>::iterator it = sortedMain.begin(); *it < pairedWinner; it++) {
+                subvector.push_back(*it);
+            }
+            PRINT_DEBUG("Inserting " << elToInsert << " using bounded binary search (from " << *sortedMain.begin() << " to " << pairedWinner << ")");
+            // Limited range binary search since there is an upperbound
+            sortedMain.insert(sortedMain.begin() + binarySearch(elToInsert, subvector), elToInsert);
+        } else {
+            PRINT_DEBUG("Inserting " << elToInsert << " using unbounded binary search (from " << *sortedMain.begin() << " to " << sortedMain.back() << ")");
+            // Full range binary search since no upper bound found
+            sortedMain.insert(sortedMain.begin() + binarySearch(elToInsert, sortedMain), elToInsert);
+        }
+        insertionIt++;
+    }
+
+    // Clear all elements of the pend chain
+    pend.erase(pend.begin(), pend.end());
+
+    PRINT_DEBUG("Main: " << sortedMain);
+    PRINT_DEBUG("Pend: " << pend);
+
+    // Measure end time
+    endTime = clock();
+
+    return (sortedMain);
+}
+
+std::deque<int>    PmergeMe::sort(const std::deque<int>& initialMain) {
+    // Create a list of losers and winners
+    std::vector<int>::iterator insertionIt;
+    std::deque<Pair>   pairs;
+    std::deque<int>    sortedMain;
+    std::deque<int>    pend;
+
+    // Note starting time 
+    startTime = clock();
+
+    // Group each number in the provided array into pairs
+    pairs = makePairs(initialMain);
+    sortedMain = getWinners(pairs);
+    pend = getLosers(pairs);
+
+    if (initialMain.size() % 2 != 0)
+        pend.push_back(initialMain.back());
+
+    PRINT_DEBUG("Main: " << sortedMain);
+    PRINT_DEBUG("Pend: " << pend);
+    
+    if (sortedMain.size() > 1) {
+        sortedMain = sort(sortedMain);
+    } else {
+        // Final form reached
+        // Only one number exists here as the winner therefore simply add it to the main
+        PRINT_DEBUG("Base case reached");
+        PRINT_DEBUG("Inserting pend elements into main");
+        sortedMain.insert(sortedMain.begin(), pend[0]);
+        if (pend.size() > 1)
+            sortedMain.insert(sortedMain.begin() + binarySearch(pend[1], sortedMain), pend[1]);
+        PRINT_DEBUG("Main: " << sortedMain);
+        return (sortedMain);
+    }
+
+    PRINT_DEBUG("Updating pend to match sortedMain");
+    // Reorder the losers array based on the sorted main 
+    updatePend(pairs, sortedMain, pend);
+    PRINT_DEBUG("Pend: " << pend);
+    
+    // Generate jacobsthal sequence of indices based on losers length
+    std::vector<int> jacobInsertionSeq = generateJacobsthalSequence(pend.size());
+
+    insertionIt = jacobInsertionSeq.begin();
+
+    PRINT_DEBUG("Beginning insertion of pend chain into main chain");
+    while (insertionIt != jacobInsertionSeq.end()) {
+        int elToInsert = pend[(*insertionIt) - 1];
+        if (*insertionIt == 1) {
+            PRINT_DEBUG("Inserting " << elToInsert << " immediately since beginning of pend chain");
+            sortedMain.insert(sortedMain.begin(), elToInsert);
+            insertionIt++;
+            continue ;
+        }
+        // Find the position to insert this loser in based on their paired winner
+        int pairedWinner = getPairedWinner(pairs, elToInsert);
+        if (pairedWinner != -1) {
+            std::vector<int>    subvector;
+            for (std::deque<int>::iterator it = sortedMain.begin(); *it < pairedWinner; it++) {
                 subvector.push_back(*it);
             }
             PRINT_DEBUG("Inserting " << elToInsert << " using bounded binary search (from " << *sortedMain.begin() << " to " << pairedWinner << ")");
