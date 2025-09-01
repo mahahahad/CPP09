@@ -32,7 +32,7 @@ fclean: clean
 
 re: fclean all
 
-debug: CXXFLAGS += -g -fsanitize=address
+debug: CXXFLAGS += -g -fsanitize=address -DDEBUG_MODE=true
 debug: re
 
 .PHONY: all clean fclean re debug

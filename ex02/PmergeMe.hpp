@@ -1,22 +1,26 @@
 #ifndef PMERGE_ME_HPP
-#define PMERGE_ME_HPP
+# define PMERGE_ME_HPP
 
-#include <iostream>
-#include <vector>
-#include <sstream>
-#include <limits>
-#include <algorithm>
+# include <iostream>
+# include <vector>
+# include <sstream>
+# include <limits>
+# include <algorithm>
+# include <math.h>
+# include <sys/time.h>
 
-#ifndef WHITESPACES
-#define WHITESPACES " \n\t\r\v\f"
-#endif
+# ifndef WHITESPACES
+#  define WHITESPACES " \n\t\r\v\f"
+# endif
+
+# ifndef DEBUG_MODE
+#  define DEBUG_MODE false
+# endif
 
 struct  Pair {
     unsigned int    winner;
-    int             loser;
+    unsigned int    loser;
 };
-
-std::vector<int>    getWinners( const std::vector<Pair>& pairs );
 
 class   PmergeMe {
     public:
@@ -25,17 +29,19 @@ class   PmergeMe {
         PmergeMe&  operator=( const PmergeMe& copy );
         ~PmergeMe( void );
 
-        std::vector<int> getArr() const;
-        std::vector<int> getMain() const;
+        std::vector<int>    getArr() const;
+        int                 handleAdd( char *line );
+        std::vector<int>    sort( const std::vector<int>& initialMain );
 
-        int     handleAdd( char *line );
-        int     sort( std::vector<int> winners ) ;
-        int     printArr( const std::vector<int>& arr ) const;
+        clock_t             startTime;
+        clock_t             endTime;
         
     private:
-        std::vector<int>    _arr;
-        std::vector<int>    _main;
+        std::vector<int>    _arr; // Only meant for storing the initial set of numbers that are parsed
         int                 _parse( const std::string& charToAdd );
 };
+
+void            printArr( const std::vector<int>& arr );
+std::ostream&   operator<<( std::ostream& output, std::vector<int> arr );
 
 #endif

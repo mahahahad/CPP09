@@ -11,7 +11,9 @@ int main(int argc, char *argv[]) {
         if (pmg.handleAdd(argv[i]))
             break ;
     }
-    pmg.sort(pmg.getArr());
-    pmg.printArr(pmg.getMain());
+    std::cout << "Before: " << pmg.getArr() << std::endl;
+    std::cout << "After:  ";
+    printArr(pmg.sort(pmg.getArr()));
+    std::cout << "Time to process a range of " << pmg.getArr().size() << " elements with std::vector : " << (double)(pmg.endTime - pmg.startTime) * 1000.0 / CLOCKS_PER_SEC << " ms" << std::endl;
     return (0);
 }
