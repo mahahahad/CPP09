@@ -6,10 +6,16 @@ int main(int argc, char *argv[]) {
         return (1);
     }
     PmergeMe pmg;
+    int     ret;
 
     for (int i = 1; i < argc; i++) {
-        if (pmg.handleAdd(argv[i]))
+        ret = pmg.handleAdd(argv[i]);
+        if (ret)
             break ;
+    }
+    if (ret || pmg.getVector().empty()) {
+        std::cerr << "Error" << std::endl;
+        return (1);
     }
     std::cout << "Before: " << pmg.getVector() << std::endl;
     std::cout << "After:  ";

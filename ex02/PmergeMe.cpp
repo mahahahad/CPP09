@@ -111,11 +111,15 @@ int    PmergeMe::handleAdd(char *line) {
         trim(lineStr);
         size_t whitespaceIndex = lineStr.find_first_of(WHITESPACES);
         std::string charToAdd = lineStr.substr(0, whitespaceIndex);
+        if (charToAdd.empty())
+            continue ;
         if (_parse(charToAdd)) {
             return (-1);
         }
         ss << charToAdd;
         ss >> num;
+        if (std::find(_arr.begin(), _arr.end(), num) != _arr.end())
+            return (-1);
         _arr.push_back(num);
         lineStr.erase(0, whitespaceIndex);
     }
@@ -274,6 +278,29 @@ The highest index value you can achieve must be the length of the pend chain
 */
 std::vector<int>    generateJacobsthalSequence(unsigned int len) {
     std::vector<int>    seq;
+
+    if (len == 0)
+        return (seq);
+
+    for (int i = 2; jacobNum(i) <= len; i++) {
+        for (int j = jacobNum(i); j >= 1; j--) {
+            if (std::find(seq.begin(), seq.end(), j) != seq.end())
+                break ;
+            seq.push_back(j);
+        }
+    }
+    if (seq.size() != len) {
+        for (int i = len; i >= 1; i--) {
+            if (std::find(seq.begin(), seq.end(), i) != seq.end())
+                break ;
+            seq.push_back(i);
+        }
+    }
+    return (seq);
+}
+
+std::deque<int>    generateJacobsthalSequenceDeq(unsigned int len) {
+    std::deque<int>    seq;
 
     if (len == 0)
         return (seq);
@@ -483,7 +510,7 @@ std::vector<int>    PmergeMe::sort(const std::vector<int>& initialMain) {
 
 std::deque<int>    PmergeMe::sort(const std::deque<int>& initialMain) {
     // Create a list of losers and winners
-    std::vector<int>::iterator insertionIt;
+    std::deque<int>::iterator insertionIt;
     std::deque<Pair>   pairs;
     std::deque<int>    sortedMain;
     std::deque<int>    pend;
@@ -522,7 +549,7 @@ std::deque<int>    PmergeMe::sort(const std::deque<int>& initialMain) {
     PRINT_DEBUG("Pend: " << pend);
     
     // Generate jacobsthal sequence of indices based on losers length
-    std::vector<int> jacobInsertionSeq = generateJacobsthalSequence(pend.size());
+    std::deque<int> jacobInsertionSeq = generateJacobsthalSequenceDeq(pend.size());
 
     insertionIt = jacobInsertionSeq.begin();
 
