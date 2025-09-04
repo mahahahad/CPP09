@@ -46,8 +46,12 @@ inline std::string& trim(std::string& s)
  * @return int 0 if successful or -1 otherwise
  */
 int    RPN::_parse(const std::string& charToAdd) {
-    if (charToAdd.length() > 1 && (charToAdd.length() == 2 && (charToAdd[0] != '+' && charToAdd[0] != '-')))
+    if (charToAdd.length() > 2) {
         return (-1);
+    }
+    if (charToAdd.length() == 2 && (charToAdd[0] != '+' && charToAdd[0] != '-')) {
+        return (-1);
+    }
     if (charToAdd.find_first_of(".()") != std::string::npos)
         return (-1);
     if (charToAdd.find_first_not_of("1234567890+-*/") != std::string::npos)
